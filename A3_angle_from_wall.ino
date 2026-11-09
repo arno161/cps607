@@ -1,0 +1,53 @@
+const int lat_sen_dis = 60; // distance between 2 lat sensors
+
+const int latBackTrigPin = 13;
+const int latBackEchoPin = 12;
+
+const int latFrontTrigPin = 11;
+const int latFrontEchoPin = 10;
+
+
+float angle_from_wall() {
+    float latBackDistance = readLateralBackSensorData() * 1000;   // m -> mm
+    float latFrontDistance = readLateralFrontSensorData() * 1000; // m -> mm
+
+    float a = abs(latBackDistance - latFrontDistance);
+    float b = lat_sen_dis;
+    float h = sqrt(pow(a, 2) + pow(b, 2));
+
+    float abs_angle = degrees(atan2(a, b));
+
+    if (latBackDistance < latFrontDistance) {
+        return 90 + abs_angle;
+        }
+        else if (latBackDistance > latFrontDistance) {
+            return 90 - abs_angle;
+        }
+        else {
+            return 90;
+        }
+}
+
+float readLateralBackSensorData() {
+  digitalWrite(latBackTrigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(latBackTrigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(latBackTrigPin, LOW);
+
+  float time = pulseIn(latBackEchoPin, HIGH, 30000) * 1e-6;
+  if (time == 0) return 4.0;     // no echo = nothing there
+  return time * 343 * 0.5;       // meters
+}
+
+float readLateralFrontSensorData() {
+  digitalWrite(latFrontTrigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(latFrontTrigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(latFrontTrigPin, LOW);
+
+  float time = pulseIn(latFrontEchoPin, HIGH, 30000) * 1e-6;
+  if (time == 0) return 4.0;     // no echo = nothing there
+  return time * 343 * 0.5;       // meters
+}
